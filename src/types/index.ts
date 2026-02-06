@@ -293,6 +293,3 @@ export interface HeatmapBubble {
   value: number;
   label: string;
 }
-
-// Re-export Prisma types
-export { Category } from '@prisma/client';
