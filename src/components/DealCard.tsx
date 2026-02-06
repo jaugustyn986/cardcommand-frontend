@@ -63,9 +63,10 @@ export default function DealCard({ deal, onClick }: DealCardProps) {
               <span className="text-xs text-slate-400">Strategy:</span>
               <span className={`text-xs font-medium px-2 py-0.5 rounded ${
                 deal.strategy.primary === 'Flip' ? 'bg-emerald-500/20 text-emerald-400' :
-                deal.strategy.primary === 'Hold' ? 'bg-blue-500/20 text-blue-400' :
+                deal.strategy.primary === 'Short Hold' ? 'bg-blue-500/20 text-blue-400' :
+                deal.strategy.primary === 'Long Hold' ? 'bg-purple-500/20 text-purple-400' :
                 deal.strategy.primary === 'Avoid' ? 'bg-red-500/20 text-red-400' :
-                'bg-purple-500/20 text-purple-400'
+                'bg-amber-500/20 text-amber-400'
               }`}>
                 {deal.strategy.primary}
               </span>
