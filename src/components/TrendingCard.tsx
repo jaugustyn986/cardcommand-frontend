@@ -67,7 +67,7 @@ export default function TrendingCard({ item }: TrendingCardProps) {
             <Search className="w-3 h-3" />
             {item.searchVolume.toLocaleString()} searches
           </span>
-          <span>Vol: {item.volumeChange > 0 ? '+' : ''}{item.volumeChange}%</span>
+          <span>Vol: {item.volumeIncrease > 0 ? '+' : ''}{item.volumeIncrease}%</span>
         </div>
       </div>
     </div>
