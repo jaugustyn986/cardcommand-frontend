@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, Bell, User, Menu, X } from 'lucide-react'
+import { Search, Bell, Menu, X } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 interface NavbarProps {
