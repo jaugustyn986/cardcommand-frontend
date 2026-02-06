@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { mockTrending } from '../data/mockData'
 
 export default function Heatmap() {
   const heatmapData = useMemo(() => {
