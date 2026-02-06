@@ -1,4 +1,4 @@
-import { Calendar, DollarSign, Flame, Package } from 'lucide-react'
+import { Calendar, DollarSign, Flame } from 'lucide-react'
 import type { Release } from '../types'
 
 interface ReleaseCardProps {
