@@ -24,7 +24,6 @@ api.interceptors.request.use((config) => {
 // Mock API for development
 export const mockApi = {
   get: async <T>(_url: string): Promise<{ data: { success: boolean; data: T } }> => {
-    // Return mock data based on URL
     return { data: { success: true, data: [] as T } }
   },
   post: async <T>(_url: string, _data?: unknown): Promise<{ data: { success: boolean; data: T } }> => {
