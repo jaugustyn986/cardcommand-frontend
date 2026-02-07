@@ -41,58 +41,6 @@ export interface RegisterRequest {
   name?: string;
 }
 
-export interface UpdatePreferencesRequest {
-  categories?: string[];
-  priceRangeMin?: number;
-  priceRangeMax?: number;
-  grades?: string[];
-  graders?: string[];
-  dealAlertThreshold?: number;
-  notificationChannels?: string[];
-}
-
-export interface CreatePortfolioItemRequest {
-  cardName: string;
-  cardSet: string;
-  year: number;
-  grade: string;
-  grader?: string;
-  currentValue: number;
-  purchasePrice: number;
-  quantity?: number;
-  imageUrl?: string;
-  notes?: string;
-}
-
-export interface UpdatePortfolioItemRequest {
-  currentValue?: number;
-  quantity?: number;
-  notes?: string;
-  inGradingQueue?: boolean;
-}
-
-// ============================================
-// Filter Types
-// ============================================
-
-export interface DealFilters {
-  categories?: string[];
-  minSavings?: number;
-  maxPrice?: number;
-  grades?: string[];
-  marketplaces?: string[];
-  search?: string;
-}
-
-export interface PriceHistoryFilters {
-  cardName: string;
-  cardSet: string;
-  year: number;
-  grade: string;
-  grader?: string;
-  days?: number;
-}
-
 // ============================================
 // Domain Types
 // ============================================
@@ -115,6 +63,33 @@ export type Liquidity = 'High' | 'Medium' | 'Low';
 export type Sentiment = 'Bullish' | 'Bearish' | 'Neutral';
 
 export type Plan = 'free' | 'premium' | 'pro';
+
+// ============================================
+// Strategy Types
+// ============================================
+
+export interface Strategy {
+  primary: 'Flip' | 'Short Hold' | 'Long Hold' | 'Avoid' | 'Grade First';
+  confidence: number;
+  reasoning: string;
+  scenarios: StrategyScenario[];
+  risks: string[];
+  alternatives: string[];
+  keyFactors: StrategyFactor[];
+}
+
+export interface StrategyScenario {
+  timeframe: string;
+  projectedReturn: number;
+  confidence: number;
+  liquidity: 'High' | 'Medium' | 'Low';
+}
+
+export interface StrategyFactor {
+  factor: string;
+  impact: 'positive' | 'negative' | 'neutral';
+  detail: string;
+}
 
 // ============================================
 // Deal Types
@@ -173,19 +148,6 @@ export interface PortfolioItem {
   updatedAt: string;
 }
 
-export interface PortfolioStats {
-  totalValue: number;
-  totalCost: number;
-  totalProfit: number;
-  profitPercent: number;
-  change24h: number;
-  change24hPercent: number;
-  change30d: number;
-  change30dPercent: number;
-  gradingQueue: number;
-  totalCards: number;
-}
-
 // ============================================
 // Trending Types
 // ============================================
@@ -237,59 +199,4 @@ export interface User {
   name?: string;
   plan: Plan;
   createdAt: string;
-}
-
-export interface UserPreferences {
-  categories: string[];
-  priceRangeMin: number;
-  priceRangeMax: number;
-  grades: string[];
-  graders: string[];
-  dealAlertThreshold: number;
-  notificationChannels: string[];
-}
-
-// ============================================
-// Strategy Types
-// ============================================
-
-export interface Strategy {
-  primary: 'Flip' | 'Short Hold' | 'Long Hold' | 'Avoid' | 'Grade First';
-  confidence: number;
-  reasoning: string;
-  scenarios: StrategyScenario[];
-  risks: string[];
-  alternatives: string[];
-  keyFactors: StrategyFactor[];
-}
-
-export interface StrategyScenario {
-  timeframe: string;
-  projectedReturn: number;
-  confidence: number;
-  liquidity: 'High' | 'Medium' | 'Low';
-}
-
-export interface StrategyFactor {
-  factor: string;
-  impact: 'positive' | 'negative' | 'neutral';
-  detail: string;
-}
-
-// ============================================
-// Heatmap Types
-// ============================================
-
-export interface HeatmapData {
-  categories: string[];
-  priceRanges: string[];
-  bubbles: HeatmapBubble[];
-}
-
-export interface HeatmapBubble {
-  x: number;
-  y: number;
-  size: number;
-  value: number;
-  label: string;
 }
