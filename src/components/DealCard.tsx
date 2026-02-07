@@ -7,8 +7,15 @@ interface DealCardProps {
 }
 
 export default function DealCard({ deal, onClick }: DealCardProps) {
-  const savingsColor = deal.savingsPercent >= 20 ? 'text-emerald-400' : deal.savingsPercent >= 10 ? 'text-yellow-400' : 'text-slate-400'
-  const trendIcon = deal.ninetyDayTrend && deal.ninetyDayTrend > 5 ? <TrendingUp className="w-4 h-4" /> : deal.ninetyDayTrend && deal.ninetyDayTrend < -5 ? <TrendingDown className="w-4 h-4" /> : <Minus className="w-4 h-4" />
+  // Convert string values to numbers (API returns strings)
+  const savingsPercent = Number(deal.savingsPercent)
+  const savingsAmount = Number(deal.savingsAmount)
+  const marketPrice = Number(deal.marketPrice)
+  const dealPrice = Number(deal.dealPrice)
+  const ninetyDayTrend = deal.ninetyDayTrend ? Number(deal.ninetyDayTrend) : null
+
+  const savingsColor = savingsPercent >= 20 ? 'text-emerald-400' : savingsPercent >= 10 ? 'text-yellow-400' : 'text-slate-400'
+  const trendIcon = ninetyDayTrend && ninetyDayTrend > 5 ? <TrendingUp className="w-4 h-4" /> : ninetyDayTrend && ninetyDayTrend < -5 ? <TrendingDown className="w-4 h-4" /> : <Minus className="w-4 h-4" />
 
   return (
     <div 
@@ -23,7 +30,7 @@ export default function DealCard({ deal, onClick }: DealCardProps) {
           className="w-full h-full object-cover group-hover:scale-105 transition-transform"
         />
         <div className="absolute top-2 right-2 bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded">
-          {deal.savingsPercent.toFixed(1)}% OFF
+          {savingsPercent.toFixed(1)}% OFF
         </div>
       </div>
 
@@ -36,19 +43,19 @@ export default function DealCard({ deal, onClick }: DealCardProps) {
 
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-slate-500 line-through">${deal.marketPrice}</p>
-            <p className="text-xl font-bold text-emerald-400">${deal.dealPrice}</p>
+            <p className="text-xs text-slate-500 line-through">${marketPrice}</p>
+            <p className="text-xl font-bold text-emerald-400">${dealPrice}</p>
           </div>
           <div className="text-right">
             <p className="text-xs text-slate-500">Save</p>
-            <p className={`font-semibold ${savingsColor}`}>${deal.savingsAmount}</p>
+            <p className={`font-semibold ${savingsColor}`}>${savingsAmount}</p>
           </div>
         </div>
 
         <div className="flex items-center justify-between text-xs text-slate-400">
           <span className="flex items-center gap-1">
             {trendIcon}
-            {deal.ninetyDayTrend ? `${deal.ninetyDayTrend > 0 ? '+' : ''}${deal.ninetyDayTrend}%` : '0%'}
+            {ninetyDayTrend ? `${ninetyDayTrend > 0 ? '+' : ''}${ninetyDayTrend}%` : '0%'}
           </span>
           <span>{deal.grade}</span>
           <span className="flex items-center gap-1">
