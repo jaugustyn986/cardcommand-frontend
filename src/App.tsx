@@ -89,23 +89,62 @@ function AppContent() {
           </div>
         )}
 
-        {/* Trending Tab */}
-        {activeTab === 'trending' && (
-          <div>
-            <div className="mb-8">
-              <Heatmap />
+{/* Trending Tab */}
+{activeTab === 'trending' && (
+  <div className="grid lg:grid-cols-12 gap-8">
+    {/* Left content - Top Risers */}
+    <div className="lg:col-span-4">
+      <h2 className="text-4xl font-bold mb-2">
+        SEE WHAT'S<br />
+        <span className="text-emerald-400">HEATING UP</span>
+      </h2>
+      <p className="text-slate-400 mb-8">
+        Heatmaps, velocity scores, and social sentiment—so you know what to buy, sell, or hold.
+      </p>
+      
+      {/* Trending list */}
+      <div className="space-y-3">
+        <p className="text-xs uppercase tracking-wider text-slate-500">TOP RISERS (24H)</p>
+        
+        {trendingLoading ? (
+          <div className="text-center py-12 text-slate-400">Loading...</div>
+        ) : (
+          displayTrending.slice(0, 4).map((item) => (
+            <div key={item.id} className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between hover:border-emerald-500/30 transition-all cursor-pointer">
+              <div>
+                <p className="font-medium text-white">{item.cardName}</p>
+                <p className="text-sm text-slate-400">{item.cardSet || item.set}</p>
+              </div>
+              <div className="text-right">
+                <p className="font-medium text-white">${item.currentPrice.toLocaleString()}</p>
+                <p className={`text-sm flex items-center gap-1 ${item.priceChange24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {item.priceChange24h >= 0 ? '↗' : '↘'}
+                  {item.priceChange24h >= 0 ? '+' : ''}{item.priceChange24h.toFixed(1)}%
+                </p>
+              </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {trendingLoading ? (
-                <div className="col-span-full text-center py-12 text-slate-400">Loading trending...</div>
-              ) : (
-                displayTrending.map((item) => (
-                  <TrendingCard key={item.id} item={item} />
-                ))
-              )}
-            </div>
-          </div>
+          ))
         )}
+      </div>
+      
+      <button className="mt-6 text-emerald-400 font-medium flex items-center gap-2 hover:gap-3 transition-all">
+        ↗ Explore trends
+        <span>›</span>
+      </button>
+    </div>
+    
+    {/* Right heatmap */}
+    <div className="lg:col-span-8">
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+        <h3 className="font-semibold mb-6 flex items-center gap-2 text-white">
+          <span className="text-emerald-400">📊</span>
+          Market Heatmap
+        </h3>
+        <Heatmap />
+      </div>
+    </div>
+  </div>
+)}
 
         {/* Releases Tab */}
         {activeTab === 'releases' && (
