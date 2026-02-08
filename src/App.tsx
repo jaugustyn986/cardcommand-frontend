@@ -4,7 +4,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import Navbar from './components/Navbar'
 import DealCard from './components/DealCard'
 import PortfolioCard from './components/PortfolioCard'
-import TrendingCard from './components/TrendingCard'
+// TrendingCard removed - using inline cards now
 import ReleaseCard from './components/ReleaseCard'
 import Heatmap from './components/Heatmap'
 import AuthModal from './components/modals/AuthModal'
@@ -106,14 +106,31 @@ function AppContent() {
       <div className="space-y-3">
         <p className="text-xs uppercase tracking-wider text-slate-500">TOP RISERS (24H)</p>
         
+       {/* Trending Tab */}
+{activeTab === 'trending' && (
+  <div className="grid lg:grid-cols-12 gap-8">
+    {/* Left content - Top Risers */}
+    <div className="lg:col-span-4">
+      <h2 className="text-4xl font-bold mb-2">
+        SEE WHAT'S<br />
+        <span className="text-emerald-400">HEATING UP</span>
+      </h2>
+      <p className="text-slate-400 mb-8">
+        Heatmaps, velocity scores, and social sentiment—so you know what to buy, sell, or hold.
+      </p>
+      
+      {/* Trending list */}
+      <div className="space-y-3">
+        <p className="text-xs uppercase tracking-wider text-slate-500">TOP RISERS (24H)</p>
+        
         {trendingLoading ? (
           <div className="text-center py-12 text-slate-400">Loading...</div>
         ) : (
-          displayTrending.slice(0, 4).map((item) => (
+          displayTrending.slice(0, 4).map((item: any) => (
             <div key={item.id} className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between hover:border-emerald-500/30 transition-all cursor-pointer">
               <div>
                 <p className="font-medium text-white">{item.cardName}</p>
-                <p className="text-sm text-slate-400">{item.cardSet || item.set}</p>
+                <p className="text-sm text-slate-400">{item.cardSet}</p>
               </div>
               <div className="text-right">
                 <p className="font-medium text-white">${item.currentPrice.toLocaleString()}</p>
@@ -145,20 +162,6 @@ function AppContent() {
     </div>
   </div>
 )}
-
-        {/* Releases Tab */}
-        {activeTab === 'releases' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {releasesLoading ? (
-              <div className="col-span-full text-center py-12 text-slate-400">Loading releases...</div>
-            ) : (
-              displayReleases.map((release) => (
-                <ReleaseCard key={release.id} release={release} />
-              ))
-            )}
-          </div>
-        )}
-      </main>
 
       {/* Modals */}
       {showAuthModal && (
