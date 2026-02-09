@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
-import { api } from '../services/api'
+import { apiClient } from '../services/api'
 
 interface User {
   id: string
@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true)
     try {
-      const response = await api.post('/auth/login', { email, password })
+      const response = await apiClient.post('/auth/login', { email, password })
       const { user, token } = response.data.data
       localStorage.setItem('token', token)
       setUser(user)
@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(async (email: string, password: string, name?: string) => {
     setIsLoading(true)
     try {
-      const response = await api.post('/auth/register', { email, password, name })
+      const response = await apiClient.post('/auth/register', { email, password, name })
       const { user, token } = response.data.data
       localStorage.setItem('token', token)
       setUser(user)

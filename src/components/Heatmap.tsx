@@ -3,7 +3,7 @@
 // ============================================
 
 import { useEffect, useState } from 'react';
-import { api } from '../services/api';
+import { apiClient } from '../services/api';
 
 interface HeatmapBubble {
   category: string;
@@ -27,7 +27,7 @@ export default function Heatmap() {
   useEffect(() => {
     const fetchHeatmap = async () => {
       try {
-        const response = await api.get('/trending/heatmap');
+        const response = await apiClient.get('/trending/heatmap');
         if (response.data.success) {
           setHeatmapData(response.data.data);
         }

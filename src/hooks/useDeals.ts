@@ -1,14 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
-import { api } from '../services/api'
+import { apiClient } from '../services/api'
 import type { Deal } from '../types'
 
 interface DealsResponse {
   success: boolean
   data: Deal[]
-  meta: {
-    total: number
+  pagination: {
     page: number
     perPage: number
+    totalCount: number
     totalPages: number
   }
 }
@@ -17,7 +17,7 @@ export function useDeals() {
   return useQuery({
     queryKey: ['deals'],
     queryFn: async () => {
-      const response = await api.get<DealsResponse>('/deals')
+      const response = await apiClient.get<DealsResponse>('/deals')
       return response.data.data
     },
   })

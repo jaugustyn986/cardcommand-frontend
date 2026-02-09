@@ -12,7 +12,7 @@ import { useDeals } from './hooks/useDeals'
 import { usePortfolio } from './hooks/usePortfolio'
 import { useTrending } from './hooks/useTrending'
 import { useReleases } from './hooks/useReleases'
-import { mockDeals, mockPortfolio, mockTrending, mockReleases } from './data/mockData'
+import { mockTrending } from './data/mockData'
 import type { Deal } from './types'
 
 const queryClient = new QueryClient()
@@ -23,15 +23,15 @@ function AppContent() {
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null)
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
 
-  const { data: deals, isLoading: dealsLoading } = useDeals()
-  const { data: portfolio, isLoading: portfolioLoading } = usePortfolio()
-  const { data: trending, isLoading: trendingLoading } = useTrending()
-  const { data: releases, isLoading: releasesLoading } = useReleases()
+  const { data: deals, isLoading: dealsLoading, error: dealsError } = useDeals()
+  const { data: portfolio, isLoading: portfolioLoading, error: portfolioError } = usePortfolio()
+  const { data: trending, isLoading: trendingLoading, error: trendingError } = useTrending()
+  const { data: releases, isLoading: releasesLoading, error: releasesError } = useReleases()
 
-  const displayDeals = deals || mockDeals
-  const displayPortfolio = portfolio || mockPortfolio
-  const displayTrending = trending || mockTrending
-  const displayReleases = releases || mockReleases
+  const displayDeals = deals ?? []
+  const displayPortfolio = portfolio ?? []
+  const displayTrending = (trending && trending.length > 0) ? trending : mockTrending
+  const displayReleases = releases ?? []
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
@@ -61,9 +61,20 @@ function AppContent() {
         {/* Deals Tab */}
         {activeTab === 'deals' && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {dealsLoading ? (
+            {dealsLoading && (
               <div className="col-span-full text-center py-12 text-slate-400">Loading deals...</div>
-            ) : (
+            )}
+            {!dealsLoading && dealsError && (
+              <div className="col-span-full text-center py-12 text-rose-400">
+                Failed to load deals. Please try again.
+              </div>
+            )}
+            {!dealsLoading && !dealsError && displayDeals.length === 0 && (
+              <div className="col-span-full text-center py-12 text-slate-400">
+                No deals found. Check back soon.
+              </div>
+            )}
+            {!dealsLoading && !dealsError && displayDeals.length > 0 &&
               displayDeals.map((deal) => (
                 <DealCard 
                   key={deal.id} 
@@ -71,20 +82,31 @@ function AppContent() {
                   onClick={() => setSelectedDeal(deal)}
                 />
               ))
-            )}
+            }
           </div>
         )}
 
         {/* Portfolio Tab */}
         {activeTab === 'portfolio' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {portfolioLoading ? (
+            {portfolioLoading && (
               <div className="col-span-full text-center py-12 text-slate-400">Loading portfolio...</div>
-            ) : (
+            )}
+            {!portfolioLoading && portfolioError && (
+              <div className="col-span-full text-center py-12 text-rose-400">
+                Failed to load your portfolio. Please sign in and try again.
+              </div>
+            )}
+            {!portfolioLoading && !portfolioError && displayPortfolio.length === 0 && (
+              <div className="col-span-full text-center py-12 text-slate-400">
+                Your portfolio is empty. Add your first card to start tracking value.
+              </div>
+            )}
+            {!portfolioLoading && !portfolioError && displayPortfolio.length > 0 &&
               displayPortfolio.map((item) => (
                 <PortfolioCard key={item.id} item={item} />
               ))
-            )}
+            }
           </div>
         )}
 
@@ -105,10 +127,15 @@ function AppContent() {
               <div className="space-y-3">
                 <p className="text-xs uppercase tracking-wider text-slate-500">TOP RISERS (24H)</p>
                 
-                {trendingLoading ? (
+                {trendingLoading && (
                   <div className="text-center py-12 text-slate-400">Loading...</div>
-                ) : (
-                  displayTrending.slice(0, 4).map((item: any) => (
+                )}
+                {!trendingLoading && trendingError && (
+                  <div className="text-center py-12 text-rose-400">
+                    Failed to load trending cards. Showing sample data.
+                  </div>
+                )}
+                {!trendingLoading && displayTrending.slice(0, 4).map((item: any) => (
                     <div key={item.id} className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between hover:border-emerald-500/30 transition-all cursor-pointer">
                       <div>
                         <p className="font-medium text-white">{item.cardName}</p>
@@ -148,13 +175,24 @@ function AppContent() {
         {/* Releases Tab */}
         {activeTab === 'releases' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {releasesLoading ? (
+            {releasesLoading && (
               <div className="col-span-full text-center py-12 text-slate-400">Loading releases...</div>
-            ) : (
+            )}
+            {!releasesLoading && releasesError && (
+              <div className="col-span-full text-center py-12 text-rose-400">
+                Failed to load releases. Please try again.
+              </div>
+            )}
+            {!releasesLoading && !releasesError && displayReleases.length === 0 && (
+              <div className="col-span-full text-center py-12 text-slate-400">
+                No upcoming releases found.
+              </div>
+            )}
+            {!releasesLoading && !releasesError && displayReleases.length > 0 &&
               displayReleases.map((release) => (
                 <ReleaseCard key={release.id} release={release} />
               ))
-            )}
+            }
           </div>
         )}
       </main>
