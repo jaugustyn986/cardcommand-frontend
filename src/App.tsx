@@ -184,26 +184,31 @@ function AppContent() {
 
         {/* Releases Tab */}
         {activeTab === 'releases' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {releasesLoading && (
-              <div className="col-span-full text-center py-12 text-slate-400">Loading releases...</div>
-            )}
-            {!releasesLoading && releasesError && (
-              <div className="col-span-full text-center py-12 text-rose-400">
-                Failed to load releases. Please try again.
-              </div>
-            )}
-            {!releasesLoading && !releasesError && displayReleases.length === 0 && (
-              <div className="col-span-full text-center py-12 text-slate-400">
-                No upcoming releases found.
-              </div>
-            )}
-            {!releasesLoading &&
-              !releasesError &&
-              displayReleases.length > 0 &&
-              displayReleases.map((release) => (
-                <ReleaseCard key={release.id} release={release} />
-              ))}
+          <div>
+            <p className="text-slate-400 text-sm mb-6">
+              Showing releases from the past month through the next 3 months.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {releasesLoading && (
+                <div className="col-span-full text-center py-12 text-slate-400">Loading releases...</div>
+              )}
+              {!releasesLoading && releasesError && (
+                <div className="col-span-full text-center py-12 text-rose-400">
+                  Failed to load releases. Please try again.
+                </div>
+              )}
+              {!releasesLoading && !releasesError && displayReleases.length === 0 && (
+                <div className="col-span-full text-center py-12 text-slate-400">
+                  No releases in this window. Check back later or try a different filter.
+                </div>
+              )}
+              {!releasesLoading &&
+                !releasesError &&
+                displayReleases.length > 0 &&
+                displayReleases.map((release) => (
+                  <ReleaseCard key={release.id} release={release} />
+                ))}
+            </div>
           </div>
         )}
       </main>

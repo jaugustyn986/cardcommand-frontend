@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Calendar, DollarSign, Flame, Package, TrendingUp } from 'lucide-react'
 import type { Release } from '../types'
 
@@ -5,12 +6,21 @@ interface ReleaseCardProps {
   release: Release
 }
 
+/** Placeholder when release has no imageUrl. Real images come from sync (Pokemon TCG API, Scryfall). */
+function releasePlaceholderUrl(category: string): string {
+  const label = encodeURIComponent(category.replace('_', ' '))
+  return `https://placehold.co/320x160/1e293b/64748b?text=${label}`
+}
+
 export default function ReleaseCard({ release }: ReleaseCardProps) {
+  const [imageFailed, setImageFailed] = useState(false)
   const daysUntil = Math.ceil((new Date(release.releaseDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
   const isReleased = daysUntil <= 0
   const profitPotential = release.estimatedResale && release.msrp 
     ? ((release.estimatedResale - release.msrp) / release.msrp * 100).toFixed(0)
     : null
+  const imageUrl = release.imageUrl || releasePlaceholderUrl(release.category)
+  const showImage = !imageFailed
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-emerald-500/30 transition-all">
@@ -38,11 +48,12 @@ export default function ReleaseCard({ release }: ReleaseCardProps) {
           )}
         </div>
 
-        {release.imageUrl ? (
+        {showImage ? (
           <img
-            src={release.imageUrl}
+            src={imageUrl}
             alt={release.name}
-            className="w-full h-full object-contain p-4"
+            className="w-full h-full object-contain p-4 bg-slate-800/50"
+            onError={() => setImageFailed(true)}
           />
         ) : (
           <div className="w-16 h-16 bg-slate-700 rounded-lg flex items-center justify-center">
