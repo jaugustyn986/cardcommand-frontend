@@ -14,5 +14,6 @@ export function useReleases() {
       const response = await apiClient.get<ReleasesResponse>('/releases')
       return response.data.data
     },
+    staleTime: 1000 * 60 * 5, // 5 min cache
   })
 }

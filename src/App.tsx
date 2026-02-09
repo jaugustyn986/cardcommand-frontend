@@ -12,6 +12,8 @@ import { useDeals } from './hooks/useDeals'
 import { usePortfolio } from './hooks/usePortfolio'
 import { useTrending } from './hooks/useTrending'
 import { useReleases } from './hooks/useReleases'
+import { useSyncReleases } from './hooks/useSyncReleases'
+import { useAuth } from './contexts/AuthContext'
 import { mockTrending } from './data/mockData'
 import type { Deal } from './types'
 
@@ -23,10 +25,12 @@ function AppContent() {
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null)
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
 
+  const { user } = useAuth()
   const { data: deals, isLoading: dealsLoading, error: dealsError } = useDeals()
   const { data: portfolio, isLoading: portfolioLoading, error: portfolioError } = usePortfolio()
   const { data: trending, isLoading: trendingLoading, error: trendingError } = useTrending()
   const { data: releases, isLoading: releasesLoading, error: releasesError } = useReleases()
+  const { mutate: syncReleases, isPending: isSyncing } = useSyncReleases()
 
   const displayDeals = deals ?? []
   const displayPortfolio = portfolio ?? []
@@ -185,9 +189,18 @@ function AppContent() {
         {/* Releases Tab */}
         {activeTab === 'releases' && (
           <div>
-            <p className="text-slate-400 text-sm mb-6">
-              Showing releases from the past month through the next 3 months.
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+              <p className="text-slate-400 text-sm">
+                Showing releases from the past month through the next 3 months.
+              </p>
+              <button
+                onClick={() => (user ? syncReleases() : setShowAuthModal(true))}
+                disabled={isSyncing || !user}
+                className="px-4 py-2 rounded-lg font-medium bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-sm transition-colors"
+              >
+                {isSyncing ? 'Syncing...' : user ? 'Sync releases' : 'Sign in to sync'}
+              </button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {releasesLoading && (
                 <div className="col-span-full text-center py-12 text-slate-400">Loading releases...</div>
