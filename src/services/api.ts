@@ -22,13 +22,15 @@ api.interceptors.request.use((config) => {
 })
 
 // Mock API for development
-export const mockApi = {
-  get: async <T>(_url: string): Promise<{ data: { success: boolean; data: T } }> => {
-    return { data: { success: true, data: [] as T } }
+type MockResponse<T> = { data: { success: boolean; data: T } }
+
+const mockApi = {
+  get<T>(_url: string): Promise<MockResponse<T>> {
+    return Promise.resolve({ data: { success: true, data: [] as T } })
   },
-  post: async <T>(_url: string, _data?: unknown): Promise<{ data: { success: boolean; data: T } }> => {
-    return { data: { success: true, data: {} as T } }
+  post<T>(_url: string, _data?: unknown): Promise<MockResponse<T>> {
+    return Promise.resolve({ data: { success: true, data: {} as T } })
   },
 }
 
-export const apiClient = USE_MOCK_API ? mockApi : api
+export const apiClient: typeof api = USE_MOCK_API ? (mockApi as any) : api

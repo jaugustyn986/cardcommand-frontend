@@ -74,15 +74,16 @@ function AppContent() {
                 No deals found. Check back soon.
               </div>
             )}
-            {!dealsLoading && !dealsError && displayDeals.length > 0 &&
-              displayDeals.map((deal) => (
-                <DealCard 
-                  key={deal.id} 
-                  deal={deal} 
+            {!dealsLoading &&
+              !dealsError &&
+              displayDeals.length > 0 &&
+              displayDeals.map((deal: Deal) => (
+                <DealCard
+                  key={deal.id}
+                  deal={deal}
                   onClick={() => setSelectedDeal(deal)}
                 />
-              ))
-            }
+              ))}
           </div>
         )}
 
@@ -102,11 +103,12 @@ function AppContent() {
                 Your portfolio is empty. Add your first card to start tracking value.
               </div>
             )}
-            {!portfolioLoading && !portfolioError && displayPortfolio.length > 0 &&
+            {!portfolioLoading &&
+              !portfolioError &&
+              displayPortfolio.length > 0 &&
               displayPortfolio.map((item) => (
                 <PortfolioCard key={item.id} item={item} />
-              ))
-            }
+              ))}
           </div>
         )}
 
@@ -135,22 +137,30 @@ function AppContent() {
                     Failed to load trending cards. Showing sample data.
                   </div>
                 )}
-                {!trendingLoading && displayTrending.slice(0, 4).map((item: any) => (
-                    <div key={item.id} className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between hover:border-emerald-500/30 transition-all cursor-pointer">
+                {!trendingLoading &&
+                  displayTrending.slice(0, 4).map((item: any) => (
+                    <div
+                      key={item.id}
+                      className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between hover:border-emerald-500/30 transition-all cursor-pointer"
+                    >
                       <div>
                         <p className="font-medium text-white">{item.cardName}</p>
                         <p className="text-sm text-slate-400">{item.cardSet}</p>
                       </div>
                       <div className="text-right">
                         <p className="font-medium text-white">${item.currentPrice.toLocaleString()}</p>
-                        <p className={`text-sm flex items-center gap-1 ${item.priceChange24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        <p
+                          className={`text-sm flex items-center gap-1 ${
+                            item.priceChange24h >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                          }`}
+                        >
                           {item.priceChange24h >= 0 ? '↗' : '↘'}
-                          {item.priceChange24h >= 0 ? '+' : ''}{item.priceChange24h.toFixed(1)}%
+                          {item.priceChange24h >= 0 ? '+' : ''}
+                          {item.priceChange24h.toFixed(1)}%
                         </p>
                       </div>
                     </div>
-                  ))
-                )}
+                  ))}
               </div>
               
               <button className="mt-6 text-emerald-400 font-medium flex items-center gap-2 hover:gap-3 transition-all">
@@ -188,11 +198,12 @@ function AppContent() {
                 No upcoming releases found.
               </div>
             )}
-            {!releasesLoading && !releasesError && displayReleases.length > 0 &&
+            {!releasesLoading &&
+              !releasesError &&
+              displayReleases.length > 0 &&
               displayReleases.map((release) => (
                 <ReleaseCard key={release.id} release={release} />
-              ))
-            }
+              ))}
           </div>
         )}
       </main>
