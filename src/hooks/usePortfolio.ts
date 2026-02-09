@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
 import type { PortfolioItem } from '../types'
 
 interface PortfolioResponse {
@@ -8,11 +9,13 @@ interface PortfolioResponse {
 }
 
 export function usePortfolio() {
+  const { user } = useAuth()
   return useQuery({
-    queryKey: ['portfolio'],
+    queryKey: ['portfolio', user?.id],
     queryFn: async () => {
       const response = await apiClient.get<PortfolioResponse>('/portfolio')
       return response.data.data
     },
+    enabled: !!user,
   })
 }

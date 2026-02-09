@@ -14,15 +14,14 @@ export default function ReleaseCard({ release }: ReleaseCardProps) {
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-emerald-500/30 transition-all">
-      {/* Header with category badge */}
-      <div className="relative h-32 bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+      {/* Header with image or placeholder */}
+      <div className="relative h-32 bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden">
         <div className="absolute top-3 left-3">
           <span className="bg-slate-700/80 backdrop-blur text-white text-xs font-medium px-2 py-1 rounded uppercase">
             {release.category}
           </span>
         </div>
         
-        {/* Release status */}
         <div className="absolute top-3 right-3">
           {isReleased ? (
             <span className="bg-emerald-500/80 backdrop-blur text-white text-xs font-bold px-2 py-1 rounded">
@@ -39,10 +38,17 @@ export default function ReleaseCard({ release }: ReleaseCardProps) {
           )}
         </div>
 
-        {/* Placeholder image */}
-        <div className="w-16 h-16 bg-slate-700 rounded-lg flex items-center justify-center">
-          <Package className="w-8 h-8 text-slate-500" />
-        </div>
+        {release.imageUrl ? (
+          <img
+            src={release.imageUrl}
+            alt={release.name}
+            className="w-full h-full object-contain p-4"
+          />
+        ) : (
+          <div className="w-16 h-16 bg-slate-700 rounded-lg flex items-center justify-center">
+            <Package className="w-8 h-8 text-slate-500" />
+          </div>
+        )}
       </div>
 
       {/* Content */}
