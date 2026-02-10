@@ -12,6 +12,7 @@ import { useDeals } from './hooks/useDeals'
 import { usePortfolio } from './hooks/usePortfolio'
 import { useTrending } from './hooks/useTrending'
 import { useReleaseProducts, type UseReleaseProductsParams } from './hooks/useReleaseProducts'
+import { useReleaseChanges } from './hooks/useReleaseChanges'
 import { useSyncReleases } from './hooks/useSyncReleases'
 import { useAuth } from './contexts/AuthContext'
 import { mockTrending } from './data/mockData'
@@ -54,6 +55,7 @@ function AppContent() {
     isLoading: releasesLoading,
     error: releasesError,
   } = useReleaseProducts(releaseProductsParams)
+  const { data: releaseChanges } = useReleaseChanges({ limit: 8 })
   const { mutate: syncReleases, isPending: isSyncing } = useSyncReleases()
 
   const displayDeals = deals ?? []
@@ -331,6 +333,31 @@ function AppContent() {
                 {isSyncing ? 'Syncing...' : user ? 'Sync releases' : 'Sign in to sync'}
               </button>
             </div>
+
+            {/* What changed */}
+            {releaseChanges && releaseChanges.length > 0 && (
+              <div className="mb-6 rounded-xl border border-slate-800 bg-slate-900/80 p-4">
+                <h3 className="text-sm font-semibold text-slate-200 mb-3 flex items-center gap-2">
+                  <span className="text-amber-400">↻</span>
+                  Recent changes
+                </h3>
+                <ul className="space-y-2">
+                  {releaseChanges.slice(0, 6).map((c) => (
+                    <li key={c.id} className="text-xs text-slate-300 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                      <span className="font-medium text-slate-200 capitalize">{c.field.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                      <span className="text-slate-400">{c.setName}</span>
+                      {c.productName !== c.setName && <span className="text-slate-500 truncate">{c.productName}</span>}
+                      <span>
+                        {c.oldValue ? <span className="line-through text-slate-500">{c.oldValue}</span> : null}
+                        {c.oldValue && c.newValue ? ' → ' : ''}
+                        {c.newValue ? <span className="text-emerald-400">{c.newValue}</span> : null}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {releasesLoading && (
                 <div className="col-span-full text-center py-12 text-slate-400">Loading releases...</div>
