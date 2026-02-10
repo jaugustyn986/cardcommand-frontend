@@ -8,6 +8,7 @@ import ReleaseProductCard from './components/ReleaseProductCard'
 import Heatmap from './components/Heatmap'
 import AuthModal from './components/modals/AuthModal'
 import StrategyModal from './components/modals/StrategyModal'
+import ReleaseStrategyModal from './components/modals/ReleaseStrategyModal'
 import { useDeals } from './hooks/useDeals'
 import { usePortfolio } from './hooks/usePortfolio'
 import { useTrending } from './hooks/useTrending'
@@ -16,7 +17,7 @@ import { useReleaseChanges } from './hooks/useReleaseChanges'
 import { useSyncReleases } from './hooks/useSyncReleases'
 import { useAuth } from './contexts/AuthContext'
 import { mockTrending } from './data/mockData'
-import type { Deal, Category } from './types'
+import type { Deal, Category, ReleaseProduct } from './types'
 
 const queryClient = new QueryClient()
 
@@ -24,6 +25,7 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState<'deals' | 'portfolio' | 'trending' | 'releases'>('deals')
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null)
+  const [selectedReleaseProduct, setSelectedReleaseProduct] = useState<ReleaseProduct | null>(null)
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
   const [releasesFilterOpen, setReleasesFilterOpen] = useState(false)
 
@@ -376,7 +378,11 @@ function AppContent() {
                 !releasesError &&
                 displayReleaseProducts.length > 0 &&
                 displayReleaseProducts.map((product) => (
-                  <ReleaseProductCard key={product.id} product={product} />
+                  <ReleaseProductCard
+                    key={product.id}
+                    product={product}
+                    onViewStrategy={setSelectedReleaseProduct}
+                  />
                 ))}
             </div>
           </div>
@@ -396,6 +402,13 @@ function AppContent() {
         <StrategyModal 
           deal={selectedDeal}
           onClose={() => setSelectedDeal(null)}
+        />
+      )}
+
+      {selectedReleaseProduct && (
+        <ReleaseStrategyModal
+          product={selectedReleaseProduct}
+          onClose={() => setSelectedReleaseProduct(null)}
         />
       )}
     </div>

@@ -189,6 +189,8 @@ export interface Release {
   updatedAt: string;
 }
 
+export type ReleaseConfidence = 'confirmed' | 'unconfirmed' | 'rumor'
+
 export interface ReleaseProduct {
   id: string;
   name: string;
@@ -201,8 +203,10 @@ export interface ReleaseProduct {
   imageUrl?: string;
   buyUrl?: string;
   contentsSummary?: string;
+  sourceUrl?: string;
   setName: string;
   setHypeScore?: number;
+  confidence?: ReleaseConfidence;
 }
 
 // ============================================
