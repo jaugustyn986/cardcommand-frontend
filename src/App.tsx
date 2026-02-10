@@ -11,11 +11,11 @@ import StrategyModal from './components/modals/StrategyModal'
 import { useDeals } from './hooks/useDeals'
 import { usePortfolio } from './hooks/usePortfolio'
 import { useTrending } from './hooks/useTrending'
-import { useReleases } from './hooks/useReleases'
+import { useReleases, type UseReleasesParams } from './hooks/useReleases'
 import { useSyncReleases } from './hooks/useSyncReleases'
 import { useAuth } from './contexts/AuthContext'
 import { mockTrending } from './data/mockData'
-import type { Deal } from './types'
+import type { Deal, Category } from './types'
 
 const queryClient = new QueryClient()
 
@@ -24,18 +24,63 @@ function AppContent() {
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null)
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
+  const [releasesFilterOpen, setReleasesFilterOpen] = useState(false)
+
+  // Default releases window: past 1 month to next 3 months
+  const now = new Date()
+  const defaultFrom = new Date(now)
+  defaultFrom.setMonth(defaultFrom.getMonth() - 1)
+  const defaultTo = new Date(now)
+  defaultTo.setMonth(defaultTo.getMonth() + 3)
+
+  const formatDateInput = (date: Date) => date.toISOString().slice(0, 10)
+
+  const [releaseFromDate, setReleaseFromDate] = useState<string>(formatDateInput(defaultFrom))
+  const [releaseToDate, setReleaseToDate] = useState<string>(formatDateInput(defaultTo))
+  const [releaseCategories, setReleaseCategories] = useState<Category[]>([])
 
   const { user } = useAuth()
   const { data: deals, isLoading: dealsLoading, error: dealsError } = useDeals()
   const { data: portfolio, isLoading: portfolioLoading, error: portfolioError } = usePortfolio()
   const { data: trending, isLoading: trendingLoading, error: trendingError } = useTrending()
-  const { data: releases, isLoading: releasesLoading, error: releasesError } = useReleases()
+  const releasesParams: UseReleasesParams = {
+    fromDate: releaseFromDate,
+    toDate: releaseToDate,
+    categories: releaseCategories,
+  }
+
+  const { data: releases, isLoading: releasesLoading, error: releasesError } = useReleases(releasesParams)
   const { mutate: syncReleases, isPending: isSyncing } = useSyncReleases()
 
   const displayDeals = deals ?? []
   const displayPortfolio = portfolio ?? []
   const displayTrending = (trending && trending.length > 0) ? trending : mockTrending
   const displayReleases = releases ?? []
+
+  const ALL_RELEASE_CATEGORIES: { value: Category; label: string }[] = [
+    { value: 'pokemon', label: 'Pokémon TCG' },
+    { value: 'mtg', label: 'Magic: The Gathering' },
+    { value: 'yugioh', label: 'Yu-Gi-Oh!' },
+    { value: 'one_piece', label: 'One Piece' },
+    { value: 'lorcana', label: 'Lorcana' },
+    { value: 'digimon', label: 'Digimon' },
+    { value: 'basketball', label: 'Basketball' },
+    { value: 'football', label: 'Football' },
+    { value: 'baseball', label: 'Baseball' },
+    { value: 'soccer', label: 'Soccer' },
+    { value: 'hockey', label: 'Hockey' },
+  ]
+
+  const toggleReleaseCategory = (category: Category) => {
+    setReleaseCategories((prev) =>
+      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
+    )
+  }
+
+  const releaseCategoryLabel =
+    releaseCategories.length === 0
+      ? 'All games'
+      : `${releaseCategories.length} game${releaseCategories.length > 1 ? 's' : ''} selected`
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
@@ -190,13 +235,94 @@ function AppContent() {
         {activeTab === 'releases' && (
           <div>
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-              <p className="text-slate-400 text-sm">
-                Showing releases from the past month through the next 3 months.
-              </p>
+              {/* Left: filters */}
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Date range */}
+                <div className="flex items-center gap-2 text-xs sm:text-sm">
+                  <span className="text-slate-400">Releases between</span>
+                  <input
+                    type="date"
+                    value={releaseFromDate}
+                    onChange={(e) => setReleaseFromDate(e.target.value)}
+                    className="bg-slate-900 border border-slate-700 rounded-md px-2 py-1 text-xs sm:text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  />
+                  <span className="text-slate-500">and</span>
+                  <input
+                    type="date"
+                    value={releaseToDate}
+                    onChange={(e) => setReleaseToDate(e.target.value)}
+                    className="bg-slate-900 border border-slate-700 rounded-md px-2 py-1 text-xs sm:text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                {/* Category multi-select */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setReleasesFilterOpen((open) => !open)}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-slate-700 bg-slate-900 text-xs sm:text-sm text-slate-200 hover:border-emerald-500/60 hover:text-white transition-colors"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                    <span>{releaseCategoryLabel}</span>
+                    <span className="text-slate-500 text-xs">▼</span>
+                  </button>
+
+                  {releasesFilterOpen && (
+                    <div className="absolute z-20 mt-2 w-56 rounded-lg border border-slate-800 bg-slate-900 shadow-xl">
+                      <div className="max-h-64 overflow-y-auto p-2">
+                        {ALL_RELEASE_CATEGORIES.map((cat) => {
+                          const active = releaseCategories.includes(cat.value)
+                          return (
+                            <button
+                              key={cat.value}
+                              type="button"
+                              onClick={() => toggleReleaseCategory(cat.value)}
+                              className={`flex w-full items-center justify-between rounded-md px-2 py-1.5 text-xs sm:text-sm ${
+                                active
+                                  ? 'bg-emerald-500/10 text-emerald-300'
+                                  : 'text-slate-200 hover:bg-slate-800'
+                              }`}
+                            >
+                              <span>{cat.label}</span>
+                              <span
+                                className={`inline-flex h-4 w-4 items-center justify-center rounded border ${
+                                  active
+                                    ? 'border-emerald-400 bg-emerald-500/80 text-slate-950'
+                                    : 'border-slate-600 text-transparent'
+                                }`}
+                              >
+                                ✓
+                              </span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                      <div className="flex items-center justify-between border-t border-slate-800 px-2 py-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setReleaseCategories([])}
+                          className="text-xs text-slate-400 hover:text-slate-200"
+                        >
+                          Clear
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setReleasesFilterOpen(false)}
+                          className="text-xs text-emerald-400 hover:text-emerald-300"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right: sync button */}
               <button
                 onClick={() => (user ? syncReleases() : setShowAuthModal(true))}
                 disabled={isSyncing || !user}
-                className="px-4 py-2 rounded-lg font-medium bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-sm transition-colors"
+                className="px-4 py-2 rounded-lg font-medium bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-sm transition-colors w-full sm:w-auto"
               >
                 {isSyncing ? 'Syncing...' : user ? 'Sync releases' : 'Sign in to sync'}
               </button>
