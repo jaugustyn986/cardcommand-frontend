@@ -4,14 +4,14 @@ import { AuthProvider } from './contexts/AuthContext'
 import Navbar from './components/Navbar'
 import DealCard from './components/DealCard'
 import PortfolioCard from './components/PortfolioCard'
-import ReleaseCard from './components/ReleaseCard'
+import ReleaseProductCard from './components/ReleaseProductCard'
 import Heatmap from './components/Heatmap'
 import AuthModal from './components/modals/AuthModal'
 import StrategyModal from './components/modals/StrategyModal'
 import { useDeals } from './hooks/useDeals'
 import { usePortfolio } from './hooks/usePortfolio'
 import { useTrending } from './hooks/useTrending'
-import { useReleases, type UseReleasesParams } from './hooks/useReleases'
+import { useReleaseProducts, type UseReleaseProductsParams } from './hooks/useReleaseProducts'
 import { useSyncReleases } from './hooks/useSyncReleases'
 import { useAuth } from './contexts/AuthContext'
 import { mockTrending } from './data/mockData'
@@ -43,19 +43,23 @@ function AppContent() {
   const { data: deals, isLoading: dealsLoading, error: dealsError } = useDeals()
   const { data: portfolio, isLoading: portfolioLoading, error: portfolioError } = usePortfolio()
   const { data: trending, isLoading: trendingLoading, error: trendingError } = useTrending()
-  const releasesParams: UseReleasesParams = {
+  const releaseProductsParams: UseReleaseProductsParams = {
     fromDate: releaseFromDate,
     toDate: releaseToDate,
     categories: releaseCategories,
   }
 
-  const { data: releases, isLoading: releasesLoading, error: releasesError } = useReleases(releasesParams)
+  const {
+    data: releaseProducts,
+    isLoading: releasesLoading,
+    error: releasesError,
+  } = useReleaseProducts(releaseProductsParams)
   const { mutate: syncReleases, isPending: isSyncing } = useSyncReleases()
 
   const displayDeals = deals ?? []
   const displayPortfolio = portfolio ?? []
   const displayTrending = (trending && trending.length > 0) ? trending : mockTrending
-  const displayReleases = releases ?? []
+  const displayReleaseProducts = releaseProducts ?? []
 
   const ALL_RELEASE_CATEGORIES: { value: Category; label: string }[] = [
     { value: 'pokemon', label: 'Pokémon TCG' },
@@ -336,16 +340,16 @@ function AppContent() {
                   Failed to load releases. Please try again.
                 </div>
               )}
-              {!releasesLoading && !releasesError && displayReleases.length === 0 && (
+              {!releasesLoading && !releasesError && displayReleaseProducts.length === 0 && (
                 <div className="col-span-full text-center py-12 text-slate-400">
                   No releases in this window. Check back later or try a different filter.
                 </div>
               )}
               {!releasesLoading &&
                 !releasesError &&
-                displayReleases.length > 0 &&
-                displayReleases.map((release) => (
-                  <ReleaseCard key={release.id} release={release} />
+                displayReleaseProducts.length > 0 &&
+                displayReleaseProducts.map((product) => (
+                  <ReleaseProductCard key={product.id} product={product} />
                 ))}
             </div>
           </div>

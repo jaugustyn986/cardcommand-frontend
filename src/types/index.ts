@@ -189,6 +189,22 @@ export interface Release {
   updatedAt: string;
 }
 
+export interface ReleaseProduct {
+  id: string;
+  name: string;
+  productType: string;
+  category: Category;
+  msrp?: number;
+  estimatedResale?: number;
+  releaseDate?: string;
+  preorderDate?: string;
+  imageUrl?: string;
+  buyUrl?: string;
+  contentsSummary?: string;
+  setName: string;
+  setHypeScore?: number;
+}
+
 // ============================================
 // User Types
 // ============================================
