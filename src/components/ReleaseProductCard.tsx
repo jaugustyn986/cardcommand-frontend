@@ -37,16 +37,27 @@ export default function ReleaseProductCard({ product, onViewStrategy }: ReleaseP
       tabIndex={onViewStrategy ? 0 : undefined}
     >
       <div className="p-4 space-y-3 flex-1 flex flex-col">
-        {/* Top row: category left, rating right */}
-        <div className="flex items-center justify-between">
+        {/* Top row: category left, release date + rating right */}
+        <div className="flex items-center justify-between gap-2">
           <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">
             {categoryLabel(product.category)}
           </span>
-          {product.setHypeScore != null && (
-            <span className="px-2 py-0.5 rounded-md text-xs font-semibold text-emerald-400 bg-emerald-500/20 border border-emerald-500/30">
-              {product.setHypeScore}/10
-            </span>
-          )}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {product.releaseDate && (
+              <span className="text-xs text-slate-400">
+                {new Date(product.releaseDate).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
+              </span>
+            )}
+            {product.setHypeScore != null && (
+              <span className="px-2 py-0.5 rounded-md text-xs font-semibold text-emerald-400 bg-emerald-500/20 border border-emerald-500/30">
+                {product.setHypeScore}/10
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Product name */}
