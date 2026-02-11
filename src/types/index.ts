@@ -191,6 +191,17 @@ export interface Release {
 
 export type ReleaseConfidence = 'confirmed' | 'unconfirmed' | 'rumor'
 
+export interface ReleaseProductStrategy {
+  primary: 'Flip' | 'Short Hold' | 'Long Hold' | 'Avoid' | 'Watch'
+  confidence: number
+  reasonSummary: string
+  keyFactors?: {
+    factor: string
+    impact: 'positive' | 'negative' | 'neutral'
+    detail: string
+  }[]
+}
+
 export interface ReleaseProduct {
   id: string;
   name: string;
@@ -207,6 +218,7 @@ export interface ReleaseProduct {
   setName: string;
   setHypeScore?: number;
   confidence?: ReleaseConfidence;
+  strategy?: ReleaseProductStrategy;
 }
 
 // ============================================

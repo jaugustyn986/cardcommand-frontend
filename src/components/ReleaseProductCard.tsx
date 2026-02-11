@@ -1,5 +1,5 @@
 import { ChevronRight } from 'lucide-react'
-import type { ReleaseProduct, ReleaseConfidence } from '../types'
+import type { ReleaseProduct, ReleaseConfidence, ReleaseProductStrategy } from '../types'
 
 interface ReleaseProductCardProps {
   product: ReleaseProduct
@@ -10,7 +10,27 @@ function categoryLabel(category: string): string {
   return category.replace(/_/g, ' ').toUpperCase()
 }
 
-function strategyFromConfidence(confidence?: ReleaseConfidence): { label: string; className: string } {
+function strategyFromConfidence(
+  confidence?: ReleaseConfidence,
+  strategy?: ReleaseProductStrategy,
+): { label: string; className: string } {
+  if (strategy?.primary) {
+    switch (strategy.primary) {
+      case 'Flip':
+        return { label: 'Flip', className: 'text-sky-400 bg-sky-500/20 border-sky-500/30' }
+      case 'Short Hold':
+        return { label: 'Short Hold', className: 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30' }
+      case 'Long Hold':
+        return { label: 'Long Hold', className: 'text-purple-400 bg-purple-500/20 border-purple-500/30' }
+      case 'Avoid':
+        return { label: 'Avoid', className: 'text-red-400 bg-red-500/20 border-red-500/30' }
+      case 'Watch':
+        return { label: 'Watch', className: 'text-amber-400 bg-amber-500/20 border-amber-500/30' }
+      default:
+        break
+    }
+  }
+
   switch (confidence) {
     case 'confirmed':
       return { label: 'Short Hold', className: 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30' }
@@ -26,7 +46,7 @@ function strategyFromConfidence(confidence?: ReleaseConfidence): { label: string
 export default function ReleaseProductCard({ product, onViewStrategy }: ReleaseProductCardProps) {
   const hasResaleProfit =
     product.estimatedResale != null && product.msrp != null && product.estimatedResale > product.msrp
-  const strategy = strategyFromConfidence(product.confidence)
+  const strategy = strategyFromConfidence(product.confidence, product.strategy)
 
   return (
     <div

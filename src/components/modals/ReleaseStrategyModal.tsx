@@ -33,7 +33,24 @@ function confidenceLabel(c?: ReleaseConfidence): string {
 }
 
 export default function ReleaseStrategyModal({ product, onClose }: ReleaseStrategyModalProps) {
-  const strategy = strategyFromConfidence(product.confidence)
+  const chip = product.strategy
+    ? (() => {
+        switch (product.strategy.primary) {
+          case 'Flip':
+            return { label: 'Flip', className: 'text-sky-400 bg-sky-500/20 border-sky-500/30' }
+          case 'Short Hold':
+            return { label: 'Short Hold', className: 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30' }
+          case 'Long Hold':
+            return { label: 'Long Hold', className: 'text-purple-400 bg-purple-500/20 border-purple-500/30' }
+          case 'Avoid':
+            return { label: 'Avoid', className: 'text-red-400 bg-red-500/20 border-red-500/30' }
+          case 'Watch':
+            return { label: 'Watch', className: 'text-amber-400 bg-amber-500/20 border-amber-500/30' }
+          default:
+            return strategyFromConfidence(product.confidence)
+        }
+      })()
+    : strategyFromConfidence(product.confidence)
   const hasResaleProfit =
     product.estimatedResale != null && product.msrp != null && product.estimatedResale > product.msrp
 
@@ -45,10 +62,14 @@ export default function ReleaseStrategyModal({ product, onClose }: ReleaseStrate
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-3 mb-2 flex-wrap">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium border ${strategy.className}`}>
-                  {strategy.label}
+                <span className={`px-3 py-1 rounded-full text-sm font-medium border ${chip.className}`}>
+                  {chip.label}
                 </span>
-                <span className="text-slate-400 text-sm">{confidenceLabel(product.confidence)} confidence</span>
+                <span className="text-slate-400 text-sm">
+                  {product.strategy
+                    ? `${product.strategy.confidence}% confidence`
+                    : `${confidenceLabel(product.confidence)} confidence`}
+                </span>
               </div>
               <h2 className="text-xl font-bold text-white">{product.name}</h2>
               <p className="text-slate-400 text-sm mt-1">{product.setName} • {product.productType.replace(/_/g, ' ')}</p>
@@ -84,10 +105,34 @@ export default function ReleaseStrategyModal({ product, onClose }: ReleaseStrate
         </div>
 
         {/* Top chases / contents */}
+        {product.strategy?.reasonSummary && (
+          <div className="p-6 border-b border-slate-800">
+            <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Strategy summary</h3>
+            <p className="text-slate-300 text-sm">{product.strategy.reasonSummary}</p>
+          </div>
+        )}
+
         {product.contentsSummary && (
           <div className="p-6 border-b border-slate-800">
             <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Top chases</h3>
             <p className="text-slate-300 text-sm">{product.contentsSummary}</p>
+          </div>
+        )}
+
+        {product.strategy?.keyFactors && product.strategy.keyFactors.length > 0 && (
+          <div className="p-6 border-b border-slate-800">
+            <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Key factors</h3>
+            <ul className="space-y-2 text-sm text-slate-300">
+              {product.strategy.keyFactors.map((factor, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="text-emerald-400 mt-0.5">➜</span>
+                  <span>
+                    <span className="font-medium">{factor.factor}: </span>
+                    <span>{factor.detail}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
