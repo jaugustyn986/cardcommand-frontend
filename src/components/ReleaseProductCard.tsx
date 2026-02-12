@@ -66,6 +66,7 @@ function sourceTypeLabel(sourceType?: string): string {
 export default function ReleaseProductCard({ product, onViewStrategy }: ReleaseProductCardProps) {
   const hasResaleProfit =
     product.estimatedResale != null && product.msrp != null && product.estimatedResale > product.msrp
+  const hasAnyMarketPrice = product.msrp != null || product.estimatedResale != null
   const strategy = strategyFromConfidence(product.confidence, product.strategy)
   const band = confidenceBand(product.confidence, product.confidenceScore)
 
@@ -130,7 +131,7 @@ export default function ReleaseProductCard({ product, onViewStrategy }: ReleaseP
         <div className="flex items-center justify-between text-sm">
           <span className="text-slate-400">Est. Resale</span>
           <span className={hasResaleProfit ? 'text-emerald-400 font-semibold' : 'text-slate-200'}>
-            {product.estimatedResale != null ? `$${product.estimatedResale}` : '—'}
+            {product.estimatedResale != null ? `$${product.estimatedResale}` : hasAnyMarketPrice ? '—' : 'No market price'}
           </span>
         </div>
 

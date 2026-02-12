@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { apiClient } from '../services/api'
+import { fetchReleaseProducts } from '../services/releaseProductsAdapter'
 import type {
   ReleaseProduct,
   Category,
@@ -8,10 +8,9 @@ import type {
   ReleaseSourceType,
   ReleaseStatus,
 } from '../types'
-
-interface ReleaseProductsResponse {
-  success: boolean
-  data: ReleaseProduct[]
+export interface ReleaseProductsResult {
+  products: ReleaseProduct[]
+  asOf?: string
 }
 
 export interface UseReleaseProductsParams {
@@ -43,12 +42,7 @@ export function useReleaseProducts(params: UseReleaseProductsParams = {}) {
 
   return useQuery({
     queryKey: ['releaseProducts', queryParams],
-    queryFn: async () => {
-      const response = await apiClient.get<ReleaseProductsResponse>('/releases/products', {
-        params: queryParams,
-      })
-      return response.data.data
-    },
+    queryFn: async (): Promise<ReleaseProductsResult> => fetchReleaseProducts(params),
     staleTime: 1000 * 60 * 5,
   })
 }

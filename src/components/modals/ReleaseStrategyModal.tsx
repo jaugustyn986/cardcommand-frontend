@@ -5,6 +5,7 @@ import type { ReleaseChange } from '../../hooks/useReleaseChanges'
 interface ReleaseStrategyModalProps {
   product: ReleaseProduct
   releaseChanges?: ReleaseChange[]
+  priceAsOf?: string
   onClose: () => void
 }
 
@@ -44,7 +45,7 @@ function sourceTypeLabel(sourceType?: string): string {
   return sourceType.charAt(0).toUpperCase() + sourceType.slice(1)
 }
 
-export default function ReleaseStrategyModal({ product, releaseChanges = [], onClose }: ReleaseStrategyModalProps) {
+export default function ReleaseStrategyModal({ product, releaseChanges = [], priceAsOf, onClose }: ReleaseStrategyModalProps) {
   const chip = product.strategy
     ? (() => {
         switch (product.strategy.primary) {
@@ -65,6 +66,7 @@ export default function ReleaseStrategyModal({ product, releaseChanges = [], onC
     : strategyFromConfidence(product.confidence)
   const hasResaleProfit =
     product.estimatedResale != null && product.msrp != null && product.estimatedResale > product.msrp
+  const hasAnyMarketPrice = product.msrp != null || product.estimatedResale != null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
@@ -103,9 +105,14 @@ export default function ReleaseStrategyModal({ product, releaseChanges = [], onC
           <div className="flex justify-between text-sm">
             <span className="text-slate-400">Est. Resale</span>
             <span className={hasResaleProfit ? 'text-emerald-400 font-semibold' : 'text-slate-200'}>
-              {product.estimatedResale != null ? `$${product.estimatedResale}` : '—'}
+              {product.estimatedResale != null ? `$${product.estimatedResale}` : hasAnyMarketPrice ? '—' : 'No market price'}
             </span>
           </div>
+          {priceAsOf && (
+            <div className="pt-1">
+              <span className="text-xs text-slate-500">As of {new Date(priceAsOf).toLocaleString()}</span>
+            </div>
+          )}
           {product.setHypeScore != null && (
             <div className="flex items-center gap-2 pt-2">
               <Flame className="w-4 h-4 text-amber-400" />

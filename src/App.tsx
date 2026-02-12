@@ -72,7 +72,7 @@ function AppContent() {
   }
 
   const {
-    data: releaseProducts,
+    data: releaseProductsResult,
     isLoading: releasesLoading,
     error: releasesError,
   } = useReleaseProducts(releaseProductsParams)
@@ -82,7 +82,8 @@ function AppContent() {
   const displayDeals = deals ?? []
   const displayPortfolio = portfolio ?? []
   const displayTrending = (trending && trending.length > 0) ? trending : mockTrending
-  const displayReleaseProducts = (releaseProducts ?? []).filter((product) => {
+  const releaseProductsAsOf = releaseProductsResult?.asOf
+  const displayReleaseProducts = (releaseProductsResult?.products ?? []).filter((product) => {
     if (releaseStatus && product.status !== releaseStatus) {
       return false
     }
@@ -429,6 +430,12 @@ function AppContent() {
               </button>
             </div>
 
+            {releaseProductsAsOf && (
+              <p className="mb-4 text-xs text-slate-400">
+                Market data as of {new Date(releaseProductsAsOf).toLocaleString()}
+              </p>
+            )}
+
             {/* What changed */}
             {releaseChanges && releaseChanges.length > 0 && (
               <div className="mb-6 rounded-xl border border-slate-800 bg-slate-900/80 p-4">
@@ -502,6 +509,7 @@ function AppContent() {
         <ReleaseStrategyModal
           product={selectedReleaseProduct}
           releaseChanges={selectedProductChanges}
+          priceAsOf={releaseProductsAsOf}
           onClose={() => setSelectedReleaseProduct(null)}
         />
       )}
