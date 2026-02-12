@@ -1,6 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '../services/api'
-import type { ReleaseProduct, Category } from '../types'
+import type {
+  ReleaseProduct,
+  Category,
+  ReleaseConfidence,
+  ReleaseConfidenceBand,
+  ReleaseSourceType,
+  ReleaseStatus,
+} from '../types'
 
 interface ReleaseProductsResponse {
   success: boolean
@@ -11,15 +18,23 @@ export interface UseReleaseProductsParams {
   fromDate?: string
   toDate?: string
   categories?: Category[]
+  confidence?: ReleaseConfidence
+  confidenceBand?: ReleaseConfidenceBand
+  status?: ReleaseStatus
+  sourceType?: ReleaseSourceType
 }
 
 function buildReleaseProductsParams(params: UseReleaseProductsParams) {
-  const { fromDate, toDate, categories } = params
+  const { fromDate, toDate, categories, confidence, confidenceBand, status, sourceType } = params
 
   return {
     fromDate,
     toDate,
     categories: categories && categories.length > 0 ? categories.join(',') : undefined,
+    confidence,
+    confidenceBand,
+    status,
+    sourceType,
   }
 }
 

@@ -1,8 +1,10 @@
 import { X, ExternalLink, Flame, Lightbulb } from 'lucide-react'
 import type { ReleaseProduct, ReleaseConfidence } from '../../types'
+import type { ReleaseChange } from '../../hooks/useReleaseChanges'
 
 interface ReleaseStrategyModalProps {
   product: ReleaseProduct
+  releaseChanges?: ReleaseChange[]
   onClose: () => void
 }
 
@@ -32,7 +34,17 @@ function confidenceLabel(c?: ReleaseConfidence): string {
   }
 }
 
-export default function ReleaseStrategyModal({ product, onClose }: ReleaseStrategyModalProps) {
+function statusLabel(status?: string): string {
+  if (!status) return '—'
+  return status.charAt(0).toUpperCase() + status.slice(1)
+}
+
+function sourceTypeLabel(sourceType?: string): string {
+  if (!sourceType) return '—'
+  return sourceType.charAt(0).toUpperCase() + sourceType.slice(1)
+}
+
+export default function ReleaseStrategyModal({ product, releaseChanges = [], onClose }: ReleaseStrategyModalProps) {
   const chip = product.strategy
     ? (() => {
         switch (product.strategy.primary) {
@@ -80,22 +92,20 @@ export default function ReleaseStrategyModal({ product, onClose }: ReleaseStrate
           </div>
         </div>
 
-        {/* Price summary */}
+        {/* Price summary — always show MSRP & Est. Resale with — when missing */}
         <div className="p-6 border-b border-slate-800 space-y-2">
-          {product.msrp !== undefined && (
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-400">MSRP</span>
-              <span className="text-slate-200">${product.msrp}</span>
-            </div>
-          )}
-          {product.estimatedResale !== undefined && (
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-400">Est. Resale</span>
-              <span className={hasResaleProfit ? 'text-emerald-400 font-semibold' : 'text-slate-200'}>
-                ${product.estimatedResale}
-              </span>
-            </div>
-          )}
+          <div className="flex justify-between text-sm">
+            <span className="text-slate-400">MSRP</span>
+            <span className="text-slate-200">
+              {product.msrp != null ? `$${product.msrp}` : '—'}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-slate-400">Est. Resale</span>
+            <span className={hasResaleProfit ? 'text-emerald-400 font-semibold' : 'text-slate-200'}>
+              {product.estimatedResale != null ? `$${product.estimatedResale}` : '—'}
+            </span>
+          </div>
           {product.setHypeScore != null && (
             <div className="flex items-center gap-2 pt-2">
               <Flame className="w-4 h-4 text-amber-400" />
@@ -104,20 +114,66 @@ export default function ReleaseStrategyModal({ product, onClose }: ReleaseStrate
           )}
         </div>
 
-        {/* Top chases / contents */}
-        {product.strategy?.reasonSummary && (
-          <div className="p-6 border-b border-slate-800">
-            <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Strategy summary</h3>
-            <p className="text-slate-300 text-sm">{product.strategy.reasonSummary}</p>
-          </div>
-        )}
+        {/* Strategy summary — always show with — when missing */}
+        <div className="p-6 border-b border-slate-800">
+          <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Strategy summary</h3>
+          <p className="text-slate-300 text-sm">{product.strategy?.reasonSummary || '—'}</p>
+        </div>
 
-        {product.contentsSummary && (
-          <div className="p-6 border-b border-slate-800">
-            <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Top chases</h3>
-            <p className="text-slate-300 text-sm">{product.contentsSummary}</p>
+        {/* Top chases — always show with — when missing */}
+        <div className="p-6 border-b border-slate-800">
+          <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Top chases</h3>
+          <p className="text-slate-300 text-sm">{product.contentsSummary || '—'}</p>
+        </div>
+
+        {/* Trust and provenance */}
+        <div className="p-6 border-b border-slate-800">
+          <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">Trust and provenance</h3>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between gap-4">
+              <span className="text-slate-400">Status</span>
+              <span className="text-slate-200">{statusLabel(product.status)}</span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span className="text-slate-400">Source type</span>
+              <span className="text-slate-200">{sourceTypeLabel(product.sourceType)}</span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span className="text-slate-400">Source tier</span>
+              <span className="text-slate-200">{product.sourceTier ?? '—'}</span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span className="text-slate-400">Confidence band</span>
+              <span className="text-slate-200">{confidenceLabel(product.confidence)}</span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span className="text-slate-400">Confidence score</span>
+              <span className="text-slate-200">
+                {product.confidenceScore != null ? `${product.confidenceScore}/100` : '—'}
+              </span>
+            </div>
           </div>
-        )}
+
+          <div className="mt-4">
+            <h4 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Recent product changes</h4>
+            {releaseChanges.length > 0 ? (
+              <ul className="space-y-2">
+                {releaseChanges.slice(0, 3).map((change) => (
+                  <li key={change.id} className="text-xs text-slate-300">
+                    <span className="text-slate-400 capitalize mr-1">
+                      {change.field.replace(/([A-Z])/g, ' $1').trim()}:
+                    </span>
+                    {change.oldValue ? <span className="line-through text-slate-500">{change.oldValue}</span> : null}
+                    {change.oldValue && change.newValue ? ' -> ' : ''}
+                    {change.newValue ? <span className="text-emerald-400">{change.newValue}</span> : '—'}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-slate-500">No recent changes recorded for this product.</p>
+            )}
+          </div>
+        </div>
 
         {product.strategy?.keyFactors && product.strategy.keyFactors.length > 0 && (
           <div className="p-6 border-b border-slate-800">
@@ -136,28 +192,30 @@ export default function ReleaseStrategyModal({ product, onClose }: ReleaseStrate
           </div>
         )}
 
-        {/* Links */}
+        {/* Links — always show section with fallbacks */}
         <div className="p-6">
           <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
             <Lightbulb className="w-4 h-4" />
             Links
           </h3>
           <ul className="space-y-2">
-            {product.buyUrl && (
-              <li>
+            <li>
+              {product.buyUrl ? (
                 <a
                   href={product.buyUrl}
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 text-sm"
                 >
-                  View product
+                  Buy / preorder
                   <ExternalLink className="w-4 h-4" />
                 </a>
-              </li>
-            )}
-            {product.sourceUrl && (
-              <li>
+              ) : (
+                <span className="text-slate-500 text-sm">Buy link —</span>
+              )}
+            </li>
+            <li>
+              {product.sourceUrl ? (
                 <a
                   href={product.sourceUrl}
                   target="_blank"
@@ -167,11 +225,10 @@ export default function ReleaseStrategyModal({ product, onClose }: ReleaseStrate
                   Source / article
                   <ExternalLink className="w-4 h-4" />
                 </a>
-              </li>
-            )}
-            {!product.buyUrl && !product.sourceUrl && (
-              <li className="text-slate-500 text-sm">No links available for this product.</li>
-            )}
+              ) : (
+                <span className="text-slate-500 text-sm">Source —</span>
+              )}
+            </li>
           </ul>
         </div>
       </div>

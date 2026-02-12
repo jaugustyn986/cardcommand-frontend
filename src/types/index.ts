@@ -190,6 +190,10 @@ export interface Release {
 }
 
 export type ReleaseConfidence = 'confirmed' | 'unconfirmed' | 'rumor'
+export type ReleaseSourceType = 'official' | 'retailer' | 'distributor' | 'news' | 'community'
+export type ReleaseStatus = 'rumor' | 'announced' | 'official' | 'released'
+export type ReleaseConfidenceBand = 'high' | 'medium' | 'low'
+export type ReleaseSourceTier = 'A' | 'B' | 'C'
 
 export interface ReleaseProductStrategy {
   primary: 'Flip' | 'Short Hold' | 'Long Hold' | 'Avoid' | 'Watch'
@@ -218,6 +222,10 @@ export interface ReleaseProduct {
   setName: string;
   setHypeScore?: number;
   confidence?: ReleaseConfidence;
+  confidenceScore?: number;
+  sourceTier?: ReleaseSourceTier;
+  sourceType?: ReleaseSourceType;
+  status?: ReleaseStatus;
   strategy?: ReleaseProductStrategy;
 }
 

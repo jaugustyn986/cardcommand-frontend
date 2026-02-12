@@ -43,10 +43,31 @@ function strategyFromConfidence(
   }
 }
 
+function confidenceBand(confidence?: ReleaseConfidence, confidenceScore?: number): 'High' | 'Medium' | 'Low' | '—' {
+  if (confidence === 'confirmed') return 'High'
+  if (confidence === 'unconfirmed') return 'Medium'
+  if (confidence === 'rumor') return 'Low'
+  if (confidenceScore == null) return '—'
+  if (confidenceScore >= 70) return 'High'
+  if (confidenceScore >= 40) return 'Medium'
+  return 'Low'
+}
+
+function statusLabel(status?: string): string {
+  if (!status) return '—'
+  return status.charAt(0).toUpperCase() + status.slice(1)
+}
+
+function sourceTypeLabel(sourceType?: string): string {
+  if (!sourceType) return '—'
+  return sourceType.charAt(0).toUpperCase() + sourceType.slice(1)
+}
+
 export default function ReleaseProductCard({ product, onViewStrategy }: ReleaseProductCardProps) {
   const hasResaleProfit =
     product.estimatedResale != null && product.msrp != null && product.estimatedResale > product.msrp
   const strategy = strategyFromConfidence(product.confidence, product.strategy)
+  const band = confidenceBand(product.confidence, product.confidenceScore)
 
   return (
     <div
@@ -83,31 +104,43 @@ export default function ReleaseProductCard({ product, onViewStrategy }: ReleaseP
         {/* Product name */}
         <h3 className="font-bold text-slate-200 text-base leading-tight line-clamp-2">{product.name}</h3>
 
-        {/* MSRP row */}
-        {product.msrp !== undefined && (
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-400">MSRP</span>
-            <span className="text-slate-200">${product.msrp}</span>
-          </div>
-        )}
+        {/* Trust metadata */}
+        <div className="flex flex-wrap gap-1.5">
+          <span className="px-2 py-0.5 rounded-md text-[11px] border border-slate-700 text-slate-300 bg-slate-800/70">
+            {statusLabel(product.status)}
+          </span>
+          <span className="px-2 py-0.5 rounded-md text-[11px] border border-slate-700 text-slate-300 bg-slate-800/70">
+            {sourceTypeLabel(product.sourceType)}
+          </span>
+          <span className="px-2 py-0.5 rounded-md text-[11px] border border-emerald-500/30 text-emerald-300 bg-emerald-500/10">
+            {band}
+            {product.confidenceScore != null ? ` (${product.confidenceScore})` : ''}
+          </span>
+        </div>
 
-        {/* Est. Resale row — green when above MSRP */}
-        {product.estimatedResale !== undefined && (
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-400">Est. Resale</span>
-            <span className={hasResaleProfit ? 'text-emerald-400 font-semibold' : 'text-slate-200'}>
-              ${product.estimatedResale}
-            </span>
-          </div>
-        )}
+        {/* MSRP row — always show, — when missing */}
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-slate-400">MSRP</span>
+          <span className="text-slate-200">
+            {product.msrp != null ? `$${product.msrp}` : '—'}
+          </span>
+        </div>
 
-        {/* Top chases (contents summary) */}
-        {product.contentsSummary && (
-          <div className="pt-1">
-            <p className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">Top chases:</p>
-            <p className="text-xs text-slate-400 line-clamp-2">{product.contentsSummary}</p>
-          </div>
-        )}
+        {/* Est. Resale row — green when above MSRP, — when missing */}
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-slate-400">Est. Resale</span>
+          <span className={hasResaleProfit ? 'text-emerald-400 font-semibold' : 'text-slate-200'}>
+            {product.estimatedResale != null ? `$${product.estimatedResale}` : '—'}
+          </span>
+        </div>
+
+        {/* Top chases (contents summary) — always show section */}
+        <div className="pt-1">
+          <p className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">Top chases</p>
+          <p className="text-xs text-slate-400 line-clamp-2">
+            {product.contentsSummary || '—'}
+          </p>
+        </div>
 
         {/* Bottom row: strategy pill left, arrow right */}
         <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-800">

@@ -13,11 +13,19 @@ import { useDeals } from './hooks/useDeals'
 import { usePortfolio } from './hooks/usePortfolio'
 import { useTrending } from './hooks/useTrending'
 import { useReleaseProducts, type UseReleaseProductsParams } from './hooks/useReleaseProducts'
-import { useReleaseChanges } from './hooks/useReleaseChanges'
+import { useReleaseChanges, type ReleaseChange } from './hooks/useReleaseChanges'
 import { useSyncReleases } from './hooks/useSyncReleases'
 import { useAuth } from './contexts/AuthContext'
 import { mockTrending } from './data/mockData'
-import type { Deal, Category, ReleaseProduct } from './types'
+import type {
+  Deal,
+  Category,
+  ReleaseProduct,
+  ReleaseConfidenceBand,
+  ReleaseConfidence,
+  ReleaseStatus,
+  ReleaseSourceType,
+} from './types'
 
 const queryClient = new QueryClient()
 
@@ -41,15 +49,26 @@ function AppContent() {
   const [releaseFromDate, setReleaseFromDate] = useState<string>(formatDateInput(defaultFrom))
   const [releaseToDate, setReleaseToDate] = useState<string>(formatDateInput(defaultTo))
   const [releaseCategories, setReleaseCategories] = useState<Category[]>([])
+  const [releaseConfidenceBand, setReleaseConfidenceBand] = useState<'' | ReleaseConfidenceBand>('')
+  const [releaseStatus, setReleaseStatus] = useState<'' | ReleaseStatus>('')
+  const [releaseSourceType, setReleaseSourceType] = useState<'' | ReleaseSourceType>('')
 
   const { user } = useAuth()
   const { data: deals, isLoading: dealsLoading, error: dealsError } = useDeals()
   const { data: portfolio, isLoading: portfolioLoading, error: portfolioError } = usePortfolio()
   const { data: trending, isLoading: trendingLoading, error: trendingError } = useTrending()
+  const confidenceFromBand: Record<ReleaseConfidenceBand, ReleaseConfidence> = {
+    high: 'confirmed',
+    medium: 'unconfirmed',
+    low: 'rumor',
+  }
+
   const releaseProductsParams: UseReleaseProductsParams = {
     fromDate: releaseFromDate,
     toDate: releaseToDate,
     categories: releaseCategories,
+    confidence: releaseConfidenceBand ? confidenceFromBand[releaseConfidenceBand] : undefined,
+    confidenceBand: releaseConfidenceBand || undefined,
   }
 
   const {
@@ -63,7 +82,39 @@ function AppContent() {
   const displayDeals = deals ?? []
   const displayPortfolio = portfolio ?? []
   const displayTrending = (trending && trending.length > 0) ? trending : mockTrending
-  const displayReleaseProducts = releaseProducts ?? []
+  const displayReleaseProducts = (releaseProducts ?? []).filter((product) => {
+    if (releaseStatus && product.status !== releaseStatus) {
+      return false
+    }
+
+    if (releaseSourceType && product.sourceType !== releaseSourceType) {
+      return false
+    }
+
+    if (!releaseConfidenceBand) {
+      return true
+    }
+
+    // Prefer confidence enum, then numeric score fallback for future API flexibility.
+    if (product.confidence === confidenceFromBand[releaseConfidenceBand]) {
+      return true
+    }
+
+    if (product.confidenceScore == null) {
+      return false
+    }
+
+    if (releaseConfidenceBand === 'high') {
+      return product.confidenceScore >= 70
+    }
+    if (releaseConfidenceBand === 'medium') {
+      return product.confidenceScore >= 40 && product.confidenceScore < 70
+    }
+    return product.confidenceScore < 40
+  })
+  const selectedProductChanges: ReleaseChange[] = selectedReleaseProduct
+    ? (releaseChanges ?? []).filter((change) => change.productId === selectedReleaseProduct.id)
+    : []
 
   const ALL_RELEASE_CATEGORIES: { value: Category; label: string }[] = [
     { value: 'pokemon', label: 'Pokémon TCG' },
@@ -324,6 +375,48 @@ function AppContent() {
                     </div>
                   )}
                 </div>
+
+                {/* Trust filters */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <select
+                    value={releaseConfidenceBand}
+                    onChange={(e) => setReleaseConfidenceBand(e.target.value as '' | ReleaseConfidenceBand)}
+                    className="bg-slate-900 border border-slate-700 rounded-md px-2 py-1 text-xs sm:text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    aria-label="Filter by confidence"
+                  >
+                    <option value="">All confidence</option>
+                    <option value="high">High confidence</option>
+                    <option value="medium">Medium confidence</option>
+                    <option value="low">Low confidence</option>
+                  </select>
+
+                  <select
+                    value={releaseStatus}
+                    onChange={(e) => setReleaseStatus(e.target.value as '' | ReleaseStatus)}
+                    className="bg-slate-900 border border-slate-700 rounded-md px-2 py-1 text-xs sm:text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    aria-label="Filter by status"
+                  >
+                    <option value="">All status</option>
+                    <option value="rumor">Rumor</option>
+                    <option value="announced">Announced</option>
+                    <option value="official">Official</option>
+                    <option value="released">Released</option>
+                  </select>
+
+                  <select
+                    value={releaseSourceType}
+                    onChange={(e) => setReleaseSourceType(e.target.value as '' | ReleaseSourceType)}
+                    className="bg-slate-900 border border-slate-700 rounded-md px-2 py-1 text-xs sm:text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    aria-label="Filter by source type"
+                  >
+                    <option value="">All source types</option>
+                    <option value="official">Official</option>
+                    <option value="retailer">Retailer</option>
+                    <option value="distributor">Distributor</option>
+                    <option value="news">News</option>
+                    <option value="community">Community</option>
+                  </select>
+                </div>
               </div>
 
               {/* Right: sync button */}
@@ -408,6 +501,7 @@ function AppContent() {
       {selectedReleaseProduct && (
         <ReleaseStrategyModal
           product={selectedReleaseProduct}
+          releaseChanges={selectedProductChanges}
           onClose={() => setSelectedReleaseProduct(null)}
         />
       )}
