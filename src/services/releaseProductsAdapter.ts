@@ -230,6 +230,11 @@ async function fetchViaTcgDataLayer(params: UseReleaseProductsParams): Promise<R
   )
   const asOf = mergeAsOf([setsAsOf, ...cardResults.map((r) => r.asOf)])
 
+  // Guardrail: if TCG layer is reachable but not hydrated yet, avoid blanking Releases UX.
+  if (products.length === 0) {
+    return fetchViaLegacyReleaseApi(params)
+  }
+
   return { products, asOf }
 }
 
