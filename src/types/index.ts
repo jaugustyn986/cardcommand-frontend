@@ -219,7 +219,19 @@ export interface ReleaseProduct {
   buyUrl?: string;
   contentsSummary?: string;
   sourceUrl?: string;
+  marketPriceContext?: {
+    source?: string
+    priceType?: string
+    asOf?: string
+    matchedProductType?: string
+    matchedProductName?: string
+    matchedProductUrl?: string
+  }
   setName: string;
+  setTopChases?: string[];
+  setTopChasesAsOf?: string;
+  setTopChasesSource?: 'price_ranked' | 'editorial_fallback';
+  setTopChasesSourceUrl?: string;
   setHypeScore?: number;
   confidence?: ReleaseConfidence;
   confidenceScore?: number;

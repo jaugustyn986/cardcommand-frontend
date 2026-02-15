@@ -45,6 +45,12 @@ function sourceTypeLabel(sourceType?: string): string {
   return sourceType.charAt(0).toUpperCase() + sourceType.slice(1)
 }
 
+function chaseSourceLabel(source?: ReleaseProduct['setTopChasesSource']): string {
+  if (source === 'price_ranked') return 'Price-ranked'
+  if (source === 'editorial_fallback') return 'Editorial fallback'
+  return 'Unknown'
+}
+
 export default function ReleaseStrategyModal({ product, releaseChanges = [], priceAsOf, onClose }: ReleaseStrategyModalProps) {
   const chip = product.strategy
     ? (() => {
@@ -67,6 +73,7 @@ export default function ReleaseStrategyModal({ product, releaseChanges = [], pri
   const hasResaleProfit =
     product.estimatedResale != null && product.msrp != null && product.estimatedResale > product.msrp
   const hasAnyMarketPrice = product.msrp != null || product.estimatedResale != null
+  const topChases = product.setTopChases && product.setTopChases.length > 0 ? product.setTopChases.slice(0, 5) : []
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
@@ -108,9 +115,22 @@ export default function ReleaseStrategyModal({ product, releaseChanges = [], pri
               {product.estimatedResale != null ? `$${product.estimatedResale}` : hasAnyMarketPrice ? '—' : 'No market price'}
             </span>
           </div>
+          {product.estimatedResale != null && product.marketPriceContext?.matchedProductName && (
+            <div className="flex justify-between text-xs">
+              <span className="text-slate-500">Price matched to</span>
+              <span className="text-slate-300">{product.marketPriceContext.matchedProductName}</span>
+            </div>
+          )}
           {priceAsOf && (
             <div className="pt-1">
               <span className="text-xs text-slate-500">As of {new Date(priceAsOf).toLocaleString()}</span>
+            </div>
+          )}
+          {product.marketPriceContext?.asOf && (
+            <div>
+              <span className="text-xs text-slate-500">
+                Market sample as of {new Date(product.marketPriceContext.asOf).toLocaleString()}
+              </span>
             </div>
           )}
           {product.setHypeScore != null && (
@@ -130,7 +150,41 @@ export default function ReleaseStrategyModal({ product, releaseChanges = [], pri
         {/* Top chases — always show with — when missing */}
         <div className="p-6 border-b border-slate-800">
           <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Top chases</h3>
-          <p className="text-slate-300 text-sm">{product.contentsSummary || '—'}</p>
+          {topChases.length > 0 ? (
+            <ul className="space-y-1">
+              {topChases.map((chase, idx) => (
+                <li key={idx} className="text-sm text-slate-300">
+                  {chase}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-slate-300 text-sm">{product.contentsSummary || '—'}</p>
+          )}
+          {product.setTopChasesAsOf && (
+            <p className="text-xs text-slate-500 mt-2">
+              Chase snapshot as of {new Date(product.setTopChasesAsOf).toLocaleString()}
+            </p>
+          )}
+          {topChases.length > 0 && (
+            <p className="text-xs text-slate-500 mt-1">
+              Source: {chaseSourceLabel(product.setTopChasesSource)}
+              {product.setTopChasesSourceUrl ? (
+                <>
+                  {' '}
+                  ·{' '}
+                  <a
+                    href={product.setTopChasesSourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-slate-300 hover:text-white underline"
+                  >
+                    View source
+                  </a>
+                </>
+              ) : null}
+            </p>
+          )}
         </div>
 
         {/* Trust and provenance */}
@@ -234,6 +288,21 @@ export default function ReleaseStrategyModal({ product, releaseChanges = [], pri
                 </a>
               ) : (
                 <span className="text-slate-500 text-sm">Source —</span>
+              )}
+            </li>
+            <li>
+              {product.marketPriceContext?.matchedProductUrl ? (
+                <a
+                  href={product.marketPriceContext.matchedProductUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-2 text-slate-300 hover:text-white text-sm"
+                >
+                  Matched market listing
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              ) : (
+                <span className="text-slate-500 text-sm">Matched listing —</span>
               )}
             </li>
           </ul>

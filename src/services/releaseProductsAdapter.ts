@@ -238,6 +238,11 @@ async function fetchViaTcgDataLayer(params: UseReleaseProductsParams): Promise<R
   return { products, asOf }
 }
 
+// Reserved for future card-focused surfaces (Deals intelligence),
+// while Releases remains sealed-product-only via /releases/products.
+const tcgCardAdapterReservedReference = fetchViaTcgDataLayer
+void tcgCardAdapterReservedReference
+
 async function fetchViaLegacyReleaseApi(params: UseReleaseProductsParams): Promise<ReleaseProductsAdapterResult> {
   const response = await apiClient.get<LegacyReleaseProductsResponse>('/releases/products', {
     params: {
@@ -254,13 +259,10 @@ async function fetchViaLegacyReleaseApi(params: UseReleaseProductsParams): Promi
 }
 
 export async function fetchReleaseProducts(params: UseReleaseProductsParams): Promise<ReleaseProductsAdapterResult> {
+  // Releases tab should only show sealed products (packs/boxes/bundles/tins/etc.).
+  // The canonical source for that is /releases/products, not card-level /tcg set cards.
   if (USE_TCG_DATA_LAYER) {
-    try {
-      return await fetchViaTcgDataLayer(params)
-    } catch (error) {
-      console.warn('TCG data layer fetch failed, falling back to legacy releases API', error)
-      return fetchViaLegacyReleaseApi(params)
-    }
+    return fetchViaLegacyReleaseApi(params)
   }
   return fetchViaLegacyReleaseApi(params)
 }

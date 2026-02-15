@@ -63,12 +63,21 @@ function sourceTypeLabel(sourceType?: string): string {
   return sourceType.charAt(0).toUpperCase() + sourceType.slice(1)
 }
 
+function chaseSourceLabel(source?: ReleaseProduct['setTopChasesSource']): string {
+  if (source === 'price_ranked') return 'price-ranked'
+  if (source === 'editorial_fallback') return 'editorial fallback'
+  return 'source unknown'
+}
+
 export default function ReleaseProductCard({ product, onViewStrategy }: ReleaseProductCardProps) {
   const hasResaleProfit =
     product.estimatedResale != null && product.msrp != null && product.estimatedResale > product.msrp
   const hasAnyMarketPrice = product.msrp != null || product.estimatedResale != null
   const strategy = strategyFromConfidence(product.confidence, product.strategy)
   const band = confidenceBand(product.confidence, product.confidenceScore)
+  const topChases = product.setTopChases && product.setTopChases.length > 0
+    ? product.setTopChases.slice(0, 5)
+    : []
 
   return (
     <div
@@ -134,13 +143,22 @@ export default function ReleaseProductCard({ product, onViewStrategy }: ReleaseP
             {product.estimatedResale != null ? `$${product.estimatedResale}` : hasAnyMarketPrice ? '—' : 'No market price'}
           </span>
         </div>
+        {product.estimatedResale != null && product.marketPriceContext?.matchedProductName && (
+          <p className="text-[11px] text-slate-500">
+            Based on {product.marketPriceContext.matchedProductName}
+          </p>
+        )}
 
         {/* Top chases (contents summary) — always show section */}
         <div className="pt-1">
-          <p className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">Top chases</p>
-          <p className="text-xs text-slate-400 line-clamp-2">
-            {product.contentsSummary || '—'}
+          <p className="text-xs text-slate-500 uppercase tracking-wide mb-0.5">
+            Top chases {topChases.length > 0 ? `(${chaseSourceLabel(product.setTopChasesSource)})` : ''}
           </p>
+          {topChases.length > 0 ? (
+            <p className="text-xs text-slate-300 line-clamp-3">{topChases.join(' • ')}</p>
+          ) : (
+            <p className="text-xs text-slate-400 line-clamp-2">{product.contentsSummary || '—'}</p>
+          )}
         </div>
 
         {/* Bottom row: strategy pill left, arrow right */}
